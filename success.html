@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Confirmation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section class="hero">
+  <h2>Payment Confirmation</h2>
+  <p>Send payment screenshot to WhatsApp</p>
+  <div style="margin-top:14px; text-align:center;">
+    <a id="waTopBtn" class="btn" href="#" style="display:inline-block; margin-bottom:12px;">CLICK HERE TO SEND PAYMENT DETAILS / SCREENSHOT</a>
+  </div>
+  <div style="margin-top:6px; display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;">
+    <div style="text-align:center">
+      <div style="font-size:13px; color:#ccc; margin-bottom:6px">Pay via UPI</div>
+      <div id="upiId" style="font-weight:700; color:#ffb3c7">yourupi@bank</div>
+      <div style="font-size:12px; color:#aaa; margin-top:6px">Or scan QR</div>
+      <div id="qrWrap" style="display:flex;align-items:center;justify-content:center;">
+        <div id="upiQr" style="width:300px; height:300px; max-width:90vw; display:flex; align-items:center; justify-content:center; background:#fff; padding:6px; border-radius:8px;"></div>
+      </div>
+      <div id="qrPlaceholder" style="font-size:13px;color:#ccc;margin-top:8px">QR will appear here — if it does not, use the UPI ID above to pay.</div>
+    </div>
+    <div style="min-width:220px; text-align:center">
+      <a id="waBtn" class="btn" href="#">SEND PAYMENT SCREENSHOT</a>
+      <div style="margin-top:8px; font-size:13px; color:#ccc">Or email: <a id="contactEmail" href="mailto:rizakundapura@gmail.com">rizakundapura@gmail.com</a></div>
+    </div>
+  </div>
+
+  <div id="orderDetails" style="margin-top:18px; color:#fff; background:#0b0b0b; padding:12px; border-radius:10px;">
+    <h3>Order Details</h3>
+    <p id="odId">Order ID: —</p>
+    <p id="odProduct">—</p>
+    <p id="odQty">—</p>
+    <p id="odShipping">—</p>
+    <p id="odPayment">Payment: —</p>
+    <p style="font-weight:700" id="odTotal">—</p>
+    <p style="margin-top:8px; color:#ccc; font-size:13px">We will contact you on the number you provided.</p>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const order = JSON.parse(localStorage.getItem('lastOrder') || 'null');
+    if (!order) return;
+
+    // Display order details
+    document.getElementById('odId').textContent = 'Order ID: ' + order.orderId;
+    document.getElementById('odProduct').textContent = 'Item: ' + order.product + ' (Size: ' + order.size + ')';
+    document.getElementById('odQty').textContent = 'Quantity: ' + order.quantity + ' × ₹' + order.unitPrice + ' = ₹' + (order.unitPrice * order.quantity);
+    document.getElementById('odShipping').textContent = 'Shipping: ₹' + order.shipping;
+    document.getElementById('odTotal').textContent = 'Total to pay: ₹' + order.total;
+
+    // Merchant/Contact config (edit UPI_ID to your actual UPI id)
+    const UPI_ID = 'rizakundapura@ybl'; // <-- replace with your UPI ID
+    const UPI_NAME = 'Gilli Winner';
+    const CONTACT_PHONE = '919448494794'; // WhatsApp number in international format without +
+    const CONTACT_EMAIL = 'rizakundapura@gmail.com';
+
+    // Build UPI URI
+    const upiUri = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${encodeURIComponent(order.total)}&cu=INR&tn=${encodeURIComponent(order.orderId)}`;
+    const upiEl = document.getElementById('upiQr');
+    const placeholder = document.getElementById('qrPlaceholder');
+
+    // Load a small QR generator (CDN fallback) then render QR into #upiQr
+    function ensureQRCodeLib(cb){
+      if(window.QRCode) return cb();
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+      s.async = true;
+      s.onload = function(){ cb(); };
+      s.onerror = function(){ cb(new Error('QR lib load failed')); };
+      document.body.appendChild(s);
+    }
+
+    ensureQRCodeLib(function(err){
+      if(err){
+        placeholder.textContent = 'Unable to load QR generator — please copy the UPI ID: ' + UPI_ID;
+        return;
+      }
+      try{
+        upiEl.innerHTML = '';
+        new QRCode(upiEl, {
+          text: upiUri,
+          width: 300,
+          height: 300,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        placeholder.style.display = 'none';
+      }catch(e){
+        placeholder.textContent = 'Unable to generate QR — please copy the UPI ID and pay: ' + UPI_ID;
+      }
+    });
+
+    document.getElementById('upiId').textContent = UPI_ID;
+    document.getElementById('contactEmail').textContent = CONTACT_EMAIL;
+    document.getElementById('contactEmail').href = 'mailto:' + CONTACT_EMAIL;
+
+    // Show payment method / ref provided (if any)
+    document.getElementById('odPayment').textContent = 'Payment: ' + (order.paymentMethod || 'UPI / Bank transfer') + (order.paymentRef ? (' — Ref: ' + order.paymentRef) : '');
+
+    // Prefill WhatsApp message asking customer to send screenshot / txn ref
+    const waText = `Paid for Order ${order.orderId} | Name:${order.customer.name} | Phone:${order.customer.phone} | Amount:₹${order.total} | Ref: (type TXN ID or attach screenshot) | Email:${order.customer.email}`;
+    const waHref = `https://wa.me/${CONTACT_PHONE}?text=${encodeURIComponent(waText)}`;
+    // set hrefs for both CTAs (top button and center button) and open in new tab
+    var waTop = document.getElementById('waTopBtn');
+    if(waTop){ waTop.href = waHref; waTop.setAttribute('target','_blank'); }
+    var waCenter = document.getElementById('waBtn');
+    if(waCenter){ waCenter.href = waHref; waCenter.setAttribute('target','_blank'); }
+
+  });
+</script>
+
+</body>
+</html>

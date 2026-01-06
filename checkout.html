@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="form">
+  <h2>Delivery Details</h2>
+  <!-- ORDER SUMMARY -->
+  <div class="order-summary" id="orderSummary" style="margin-bottom:20px; background:#0b0b0b; padding:16px; border-radius:12px;">
+    <h3>Order Summary</h3>
+    <p id="prodName">Item: —</p>
+    <p>Price: <span id="unitPrice">—</span></p>
+    <label>Quantity</label>
+    <input type="number" id="checkoutQty" min="1" value="1" style="width:100px;">
+    <p>Subtotal: ₹<span id="subtotal">0</span></p>
+    <p>Shipping: ₹<span id="shipping">50</span></p>
+    <p style="font-weight:700">Total: ₹<span id="total">0</span></p>
+  </div>
+
+  <form id="orderForm">
+    <input name="name" placeholder="Full Name" required>
+    <input name="phone" placeholder="Phone Number" required>
+    <input name="email" placeholder="Email" required>
+    <textarea name="address" placeholder="Full Address" required></textarea>
+    <input name="city" placeholder="City" required>
+    <input name="pincode" placeholder="Pincode" required>
+
+    <!-- Hidden fields to keep order info if needed -->
+    <input type="hidden" name="product" id="productInput">
+    <input type="hidden" name="unitPrice" id="unitPriceInput">
+    <input type="hidden" name="quantity" id="quantityInput">
+    <input type="hidden" name="shipping" id="shippingInput" value="50">
+    <input type="hidden" name="total" id="totalInput">
+
+    <label>Payment method</label>
+    <select name="paymentMethod" id="paymentMethod">
+      <option>UPI / QR code</option>
+    </select>
+
+    <label>Payment reference (TXN ID / UPI ref)</label>
+    <input name="paymentRef" id="paymentRef" placeholder="e.g. UPI TXN or link">
+
+    <button type="submit">PROCEED TO PAYMENT</button>
+  </form>
+</div>
+
+<script>
+const SHIPPING_CHARGE = 50;
+
+function formatRupee(n){ return n; }
+
+document.addEventListener('DOMContentLoaded', function(){
+  const cart = JSON.parse(localStorage.getItem('cart') || 'null');
+  if (!cart) {
+    document.getElementById('orderSummary').innerHTML = '<p>No items in cart. <a href="index.html">Go back to shop</a></p>';
+    return;
+  }
+
+  const prodName = document.getElementById('prodName');
+  const unitPriceEl = document.getElementById('unitPrice');
+  const subtotalEl = document.getElementById('subtotal');
+  const totalEl = document.getElementById('total');
+  const qtyInput = document.getElementById('checkoutQty');
+
+  prodName.textContent = 'Item: ' + cart.productName + ' (Size: ' + cart.size + ')';
+  unitPriceEl.textContent = '₹' + cart.unitPrice;
+  qtyInput.value = cart.quantity;
+
+  function updateTotals(qty) {
+    const subtotal = cart.unitPrice * qty;
+    const total = subtotal + SHIPPING_CHARGE;
+    subtotalEl.textContent = subtotal;
+    document.getElementById('shipping').textContent = SHIPPING_CHARGE;
+    totalEl.textContent = total;
+
+    // update hidden inputs
+    document.getElementById('productInput').value = cart.productName + ' (Size: ' + cart.size + ')';
+    document.getElementById('unitPriceInput').value = cart.unitPrice;
+    document.getElementById('quantityInput').value = qty;
+    document.getElementById('shippingInput').value = SHIPPING_CHARGE;
+    document.getElementById('totalInput').value = total;
+
+    // update cart in storage
+    cart.quantity = qty;
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }
+
+  updateTotals(cart.quantity);
+
+  qtyInput.addEventListener('change', function(){
+    let q = parseInt(this.value, 10) || 1;
+    if (q < 1) q = 1;
+    this.value = q;
+    updateTotals(q);
+  });
+
+  // on form submit, save order snapshot and redirect to success page
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const orderId = 'GILLI-' + Date.now();
+    const totalVal = parseInt(document.getElementById('totalInput').value, 10) || (cart.unitPrice*cart.quantity + SHIPPING_CHARGE);
+    const order = {
+      orderId: orderId,
+      product: cart.productName,
+      size: cart.size,
+      unitPrice: cart.unitPrice,
+      quantity: cart.quantity,
+      shipping: SHIPPING_CHARGE,
+      total: totalVal,
+      paymentMethod: this.paymentMethod ? this.paymentMethod.value : 'UPI / Bank transfer',
+      paymentRef: this.paymentRef ? this.paymentRef.value : '',
+      customer: {
+        name: this.name.value,
+        phone: this.phone.value,
+        email: this.email.value,
+        address: this.address.value,
+        city: this.city.value,
+        pincode: this.pincode.value
+      },
+      status: 'pending_payment'
+    };
+
+    localStorage.setItem('lastOrder', JSON.stringify(order));
+    // Redirect to success page where we show UPI/QR and WhatsApp instructions
+    window.location.href = 'success.html';
+  });
+});
+</script>
+
+</body>
+</html>

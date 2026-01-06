@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gilli Winner Drop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="nav">
+        <h1>GILLI<span>WIN</span></h1>
+        <div>
+            <a href="#product">Product</a>
+            <a href="checkout.html">Checkout</a>
+        </div>
+    </div>
+
+    <section class="hero">
+        <h2>ಈ ಸೀಸನ್ ಒಂದೇ ಹೆಸರು <span>ಗಿಲ್ಲಿ</span></h2>
+        <p>Limited fan drop supporting Gilli & helping people in need</p>
+        <a href="checkout.html" class="btn">BUY LIMITED EDITION</a>
+    </section>
+
+    <div id="saleBanner" style="background:#ff3b81;padding:12px;text-align:center;color:#fff;">
+        <strong>2‑Week Drop</strong> — Sale ends in <span id="countdown">...</span>
+    </div>
+
+    <section class="card" id="product">
+        <img src="tshirt.png" alt="Gilli Winner T-Shirt">
+
+        <div class="product-details">
+            <h3>Gilli Winner – Black Edition</h3>
+
+            <p class="price">₹499 <span>₹799</span></p>
+
+            <p class="desc">
+                Premium fan-made T-shirt supporting Gilli
+                & helping people in need.
+            </p>
+
+            <!-- SIZE SELECT -->
+            <label>Select Size</label>
+            <select id="sizeSelect">
+                <option value="">Select Size</option>
+                <option>S</option>
+                <option>M</option>
+                <option>L</option>
+                <option>XL</option>
+                <option>2XL</option>
+                <option>3XL</option>
+                <option>4XL</option>
+                <option>5XL</option>
+            </select>
+
+            <!-- QUANTITY -->
+            <label style="margin-top:12px">Quantity</label>
+            <input type="number" id="qtyInput" min="1" step="1" value="1">
+
+            <!-- BUY BUTTON -->
+            <button class="buy-btn" onclick="goToCheckout()">
+                BUY NOW
+            </button>
+
+            <p class="note">
+                ❤️ All profits will be donated to help poor people<br>
+                ❤️ ಎಲ್ಲಾ ಲಾಭವನ್ನು ಬಡವರಿಗೆ ಸಹಾಯ ಮಾಡಲು ದಾನ ಮಾಡಲಾಗುತ್ತದೆ
+            </p>
+
+        </div>
+    </section>
+
+    <script>
+        function goToCheckout() {
+            const size = document.getElementById("sizeSelect").value;
+            const qty = parseInt(document.getElementById("qtyInput").value, 10) || 1;
+            if (!size) {
+                alert("Please select size");
+                return;
+            }
+            if (qty < 1) {
+                alert("Quantity must be at least 1");
+                return;
+            }
+
+            // Save cart details for checkout page
+            const cart = {
+                productName: 'Gilli Winner – Black Edition',
+                unitPrice: 499,
+                quantity: qty,
+                size: size
+            };
+            localStorage.setItem('cart', JSON.stringify(cart));
+            window.location.href = 'checkout.html';
+        }
+
+        const saleEnd = new Date(Date.now() + 14*24*60*60*1000); // 14 days from now
+        function tick(){
+          const ms = saleEnd - Date.now();
+          if(ms <= 0){
+            document.getElementById('countdown').textContent = 'ENDED';
+            document.querySelectorAll('.buy-btn, .btn').forEach(b=>b.disabled = true);
+            return;
+          }
+          const d = Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000), m=Math.floor(ms%3600000/60000);
+          document.getElementById('countdown').textContent = `${d}d ${h}h ${m}m`;
+        }
+        setInterval(tick,1000); tick();
+    </script>
+
+
+    <footer>
+        Fan-made merchandise • No official logos used
+    </footer>
+
+</body>
+
+</html>
