@@ -40,9 +40,6 @@
       <option>UPI / QR code</option>
     </select>
 
-    <label>Payment reference (TXN ID / UPI ref)</label>
-    <input name="paymentRef" id="paymentRef" placeholder="e.g. UPI TXN or link">
-
     <button type="submit">PROCEED TO PAYMENT</button>
   </form>
 </div>
@@ -111,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function(){
       shipping: SHIPPING_CHARGE,
       total: totalVal,
       paymentMethod: this.paymentMethod ? this.paymentMethod.value : 'UPI / Bank transfer',
-      paymentRef: this.paymentRef ? this.paymentRef.value : '',
       customer: {
         name: this.name.value,
         phone: this.phone.value,

@@ -100,7 +100,7 @@
     document.getElementById('contactEmail').href = 'mailto:' + CONTACT_EMAIL;
 
     // Show payment method / ref provided (if any)
-    document.getElementById('odPayment').textContent = 'Payment: ' + (order.paymentMethod || 'UPI / Bank transfer') + (order.paymentRef ? (' — Ref: ' + order.paymentRef) : '');
+    document.getElementById('odPayment').textContent = 'Payment: ' + (order.paymentMethod || 'UPI / Bank transfer');
 
     // Prefill WhatsApp message asking customer to send screenshot / txn ref
     const waText = `Paid for Order ${order.orderId} | Name:${order.customer.name} | Phone:${order.customer.phone} | Amount:₹${order.total} | Ref: (type TXN ID or attach screenshot) | Email:${order.customer.email}`;
