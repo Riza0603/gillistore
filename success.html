@@ -103,7 +103,7 @@
     document.getElementById('odPayment').textContent = 'Payment: ' + (order.paymentMethod || 'UPI / Bank transfer');
 
     // Prefill WhatsApp message asking customer to send screenshot / txn ref
-    const waText = `Paid for Order ${order.orderId} | Name:${order.customer.name} | Phone:${order.customer.phone} | Amount:₹${order.total} | Ref: (type TXN ID or attach screenshot) | Email:${order.customer.email}`;
+    const waText = `Paid for Order ${order.orderId} | Name:${order.customer.name} | Phone:${order.customer.phone} | Item:${order.product} | Size:${order.size} | Qty:${order.quantity} | Address:${order.customer.address} | City:${order.customer.city} | Pincode:${order.customer.pincode} | Amount:₹${order.total} | Ref: (type TXN ID or attach screenshot) | Email:${order.customer.email}`;
     const waHref = `https://wa.me/${CONTACT_PHONE}?text=${encodeURIComponent(waText)}`;
     // set hrefs for both CTAs (top button and center button) and open in new tab
     var waTop = document.getElementById('waTopBtn');
