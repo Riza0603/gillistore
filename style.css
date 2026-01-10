@@ -146,6 +146,12 @@ footer {
   color: #aaa;
 }
 
+.no-return {
+  color: #b00; /* red */
+  font-weight: 700;
+  margin-top: 1rem;
+}
+
 /* MOBILE */
 @media(max-width: 768px) {
   .card {
